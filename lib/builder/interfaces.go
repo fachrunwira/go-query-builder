@@ -31,10 +31,14 @@ type manipulateData interface {
 	WhereRaw(query string, bindings ...interface{}) manipulateData
 	Where(column string, values interface{}) manipulateData
 	WhereNot(column string, values interface{}) manipulateData
+	WhereIn(column string, values []interface{}) manipulateData
+	WhereNotIn(column string, values []interface{}) manipulateData
 
 	OrWhereRaw(query string, bindings ...interface{}) manipulateData
 	OrWhere(column string, values interface{}) manipulateData
 	OrWhereNot(column string, values interface{}) manipulateData
+	OrWhereIn(column string, values []interface{}) manipulateData
+	OrWhereNotIn(column string, values []interface{}) manipulateData
 
 	Join(tableJoin, table_1, table_2 string) manipulateData
 
