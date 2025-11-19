@@ -93,9 +93,9 @@ func initManipulateData(q *queryStruct) (string, []interface{}) {
 	return "", []interface{}{}
 }
 
-func printManipulateData(q *queryStruct) *string {
+func printManipulateData(q *queryStruct) string {
 	query, _ := initManipulateData(q)
-	return &query
+	return query
 }
 
 func initQuery(q *queryStruct) (string, []interface{}) {
@@ -104,18 +104,62 @@ func initQuery(q *queryStruct) (string, []interface{}) {
 		fields = strings.Join(q.fields, ",")
 	}
 
+	var args []interface{}
 	query := fmt.Sprintf("SELECT %s FROM %s", fields, q.tableName)
 	if q.tableAlias != "" {
 		query += " AS " + q.tableAlias
 	}
 
-	query += ";"
-	args := q.whereArgs
+	if len(q.joins) > 0 {
+		query += fmt.Sprintf(" %s", strings.Join(q.joins, " "))
+		args = append(args, q.joinArgs...)
+	}
+
+	if len(q.whereClause) > 0 {
+		query += fmt.Sprintf(" WHERE %s", strings.Join(q.whereClause, " "))
+		args = append(args, q.whereArgs...)
+	}
+
+	if len(q.grouping) > 0 {
+		query += fmt.Sprintf(" GROUP BY %s", strings.Join(q.grouping, ","))
+	}
+
+	if len(q.ordering) > 0 {
+		query += fmt.Sprintf(" ORDER BY %s", strings.Join(q.ordering, ","))
+	}
 
 	return query, args
 }
 
-func printQuery(q *queryStruct) *string {
+func printQuery(q *queryStruct) string {
 	query, _ := initQuery(q)
-	return &query
+	return query
+}
+
+func convertRow(data any) (Row, error) {
+	switch x := data.(type) {
+	case Row:
+		return x, nil
+	case map[string]interface{}:
+		return Row(x), nil
+	}
+	return nil, fmt.Errorf("unsupported type")
+}
+
+func convertRows(data any) (Rows, error) {
+	switch x := data.(type) {
+	case Rows:
+		return x, nil
+	case []map[string]interface{}:
+		rows := make(Rows, len(x))
+		for i := range x {
+			rows[i] = Row(x[i])
+		}
+		return rows, nil
+	case Row:
+		return Rows{x}, nil
+	case map[string]interface{}:
+		return Rows{Row(x)}, nil
+	}
+	return nil, fmt.Errorf("unsupported type")
 }

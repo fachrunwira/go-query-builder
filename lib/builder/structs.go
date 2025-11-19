@@ -10,10 +10,15 @@ type queryStruct struct {
 	whereClause []string
 	whereArgs   []interface{}
 
-	joins []string
+	joins    []string
+	joinArgs []interface{}
 
 	manipulateType string
 	manipulateArgs Rows
+
+	grouping []string
+
+	ordering []string
 
 	errors error
 }

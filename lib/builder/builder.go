@@ -41,9 +41,9 @@ func (q *queryStruct) ToRaw() string {
 	return query + ";"
 }
 
-func (q *queryStruct) ToSql() (*string, error) {
+func (q *queryStruct) ToSql() (string, error) {
 	if q.errors != nil {
-		return nil, q.errors
+		return "", q.errors
 	}
 
 	if q.manipulateType != "" {

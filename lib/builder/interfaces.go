@@ -17,7 +17,7 @@ type initialStage interface {
 }
 
 type insertOrQueryingStage interface {
-	Insert(data Rows) generateCreateQuery
+	Insert(data any) generateCreateQuery
 	manipulateData
 	errorInterface
 }
@@ -25,7 +25,7 @@ type insertOrQueryingStage interface {
 type manipulateData interface {
 	Select(columns ...string) manipulateData
 
-	Update(data Row) generateCreateQuery
+	Update(data any) generateCreateQuery
 	Delete() generateCreateQuery
 
 	WhereRaw(query string, bindings ...interface{}) manipulateData
@@ -40,19 +40,28 @@ type manipulateData interface {
 	OrWhereIn(column string, values []interface{}) manipulateData
 	OrWhereNotIn(column string, values []interface{}) manipulateData
 
-	Join(tableJoin, table_1, table_2 string) manipulateData
+	Join(tableJoin, table_1, operator, table_2 string) manipulateData
+	JoinWhere(tableJoin, table_1, operator string, bindings ...interface{}) manipulateData
+
+	LeftJoin(tableJoin, table_1, operator, table_2 string) manipulateData
+	RightJoin(tableJoin, table_1, operator, table_2 string) manipulateData
+
+	GroupBy(columns ...string) manipulateData
+
+	OrderByAsc(column string) manipulateData
+	OrderByDesc(column string) manipulateData
 
 	generateSelectQuery
 	errorInterface
 }
 
 type generateSelectQuery interface {
-	ToSql() (*string, error)
+	ToSql() (string, error)
 	errorInterface
 }
 
 type generateCreateQuery interface {
-	ToSql() (*string, error)
+	ToSql() (string, error)
 	Save() error
 	errorInterface
 }
