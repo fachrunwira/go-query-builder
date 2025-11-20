@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (q *queryStruct) Where(column string, values interface{}) manipulateData {
+func (q *queryStruct) Where(column string, values interface{}) manipulateOrQuerying {
 	if len(q.whereClause) > 0 {
 		q.whereClause = append(q.whereClause, fmt.Sprintf("AND %s = ?", column))
 	} else {
@@ -16,7 +16,7 @@ func (q *queryStruct) Where(column string, values interface{}) manipulateData {
 	return q
 }
 
-func (q *queryStruct) WhereRaw(query string, bindings ...interface{}) manipulateData {
+func (q *queryStruct) WhereRaw(query string, bindings ...interface{}) manipulateOrQuerying {
 	if len(q.whereClause) > 0 {
 		q.whereClause = append(q.whereClause, fmt.Sprintf("AND %s", query))
 	} else {
@@ -29,7 +29,7 @@ func (q *queryStruct) WhereRaw(query string, bindings ...interface{}) manipulate
 	return q
 }
 
-func (q *queryStruct) WhereNot(column string, values interface{}) manipulateData {
+func (q *queryStruct) WhereNot(column string, values interface{}) manipulateOrQuerying {
 	if len(q.whereClause) > 0 {
 		q.whereClause = append(q.whereClause, fmt.Sprintf("AND NOT %s = ?", column))
 	} else {
@@ -40,7 +40,7 @@ func (q *queryStruct) WhereNot(column string, values interface{}) manipulateData
 	return q
 }
 
-func (q *queryStruct) OrWhereRaw(query string, bindings ...interface{}) manipulateData {
+func (q *queryStruct) OrWhereRaw(query string, bindings ...interface{}) manipulateOrQuerying {
 	if len(q.whereClause) > 0 {
 		q.whereClause = append(q.whereClause, fmt.Sprintf("OR %s", query))
 	} else {
@@ -53,7 +53,7 @@ func (q *queryStruct) OrWhereRaw(query string, bindings ...interface{}) manipula
 	return q
 }
 
-func (q *queryStruct) OrWhere(column string, values interface{}) manipulateData {
+func (q *queryStruct) OrWhere(column string, values interface{}) manipulateOrQuerying {
 	if len(q.whereClause) > 0 {
 		q.whereClause = append(q.whereClause, fmt.Sprintf("OR %s = ?", column))
 	} else {
@@ -64,7 +64,7 @@ func (q *queryStruct) OrWhere(column string, values interface{}) manipulateData 
 	return q
 }
 
-func (q *queryStruct) OrWhereNot(column string, values interface{}) manipulateData {
+func (q *queryStruct) OrWhereNot(column string, values interface{}) manipulateOrQuerying {
 	if len(q.whereClause) > 0 {
 		q.whereClause = append(q.whereClause, fmt.Sprintf("OR NOT %s = ?", column))
 	} else {
@@ -75,7 +75,7 @@ func (q *queryStruct) OrWhereNot(column string, values interface{}) manipulateDa
 	return q
 }
 
-func (q *queryStruct) WhereIn(column string, values []interface{}) manipulateData {
+func (q *queryStruct) WhereIn(column string, values []interface{}) manipulateOrQuerying {
 	if len(values) == 0 {
 		q.errors = fmt.Errorf("no where in value bindings detected")
 		return q
@@ -92,7 +92,7 @@ func (q *queryStruct) WhereIn(column string, values []interface{}) manipulateDat
 	return q
 }
 
-func (q *queryStruct) WhereNotIn(column string, values []interface{}) manipulateData {
+func (q *queryStruct) WhereNotIn(column string, values []interface{}) manipulateOrQuerying {
 	if len(values) == 0 {
 		q.errors = fmt.Errorf("no where in value bindings detected")
 		return q
@@ -109,7 +109,7 @@ func (q *queryStruct) WhereNotIn(column string, values []interface{}) manipulate
 	return q
 }
 
-func (q *queryStruct) OrWhereIn(column string, values []interface{}) manipulateData {
+func (q *queryStruct) OrWhereIn(column string, values []interface{}) manipulateOrQuerying {
 	if len(values) == 0 {
 		q.errors = fmt.Errorf("no where in value bindings detected")
 		return q
@@ -126,7 +126,7 @@ func (q *queryStruct) OrWhereIn(column string, values []interface{}) manipulateD
 	return q
 }
 
-func (q *queryStruct) OrWhereNotIn(column string, values []interface{}) manipulateData {
+func (q *queryStruct) OrWhereNotIn(column string, values []interface{}) manipulateOrQuerying {
 	if len(values) == 0 {
 		q.errors = fmt.Errorf("no where in value bindings detected")
 		return q

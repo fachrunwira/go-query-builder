@@ -18,54 +18,80 @@ type initialStage interface {
 
 type insertOrQueryingStage interface {
 	Insert(data any) generateCreateQuery
-	manipulateData
-	errorInterface
+	combinedInterface1
 }
 
-type manipulateData interface {
-	Select(columns ...string) manipulateData
+type combinedInterface1 interface {
+	selectInterface
+	whereInterface
+	joinInterface
+	groupingInterface
+	orderingInterface
+}
 
+type selectInterface interface {
+	Select(columns ...string) manipulateData
+}
+
+type whereInterface interface {
+	WhereRaw(query string, bindings ...interface{}) manipulateOrQuerying
+	Where(column string, values interface{}) manipulateOrQuerying
+	WhereNot(column string, values interface{}) manipulateOrQuerying
+	WhereIn(column string, values []interface{}) manipulateOrQuerying
+	WhereNotIn(column string, values []interface{}) manipulateOrQuerying
+
+	OrWhereRaw(query string, bindings ...interface{}) manipulateOrQuerying
+	OrWhere(column string, values interface{}) manipulateOrQuerying
+	OrWhereNot(column string, values interface{}) manipulateOrQuerying
+	OrWhereIn(column string, values []interface{}) manipulateOrQuerying
+	OrWhereNotIn(column string, values []interface{}) manipulateOrQuerying
+}
+
+type updateOrDeleteInterface interface {
 	Update(data any) generateCreateQuery
 	Delete() generateCreateQuery
+}
 
-	WhereRaw(query string, bindings ...interface{}) manipulateData
-	Where(column string, values interface{}) manipulateData
-	WhereNot(column string, values interface{}) manipulateData
-	WhereIn(column string, values []interface{}) manipulateData
-	WhereNotIn(column string, values []interface{}) manipulateData
+type manipulateOrQuerying interface {
+	updateOrDeleteInterface
+	selectInterface
+	whereInterface
+	joinInterface
+	groupingInterface
+	orderingInterface
+}
 
-	OrWhereRaw(query string, bindings ...interface{}) manipulateData
-	OrWhere(column string, values interface{}) manipulateData
-	OrWhereNot(column string, values interface{}) manipulateData
-	OrWhereIn(column string, values []interface{}) manipulateData
-	OrWhereNotIn(column string, values []interface{}) manipulateData
-
+type joinInterface interface {
 	Join(tableJoin, table_1, operator, table_2 string) manipulateData
 	JoinWhere(tableJoin, table_1, operator string, bindings ...interface{}) manipulateData
 
 	LeftJoin(tableJoin, table_1, operator, table_2 string) manipulateData
 	RightJoin(tableJoin, table_1, operator, table_2 string) manipulateData
+}
 
+type groupingInterface interface {
 	GroupBy(columns ...string) manipulateData
+}
 
+type orderingInterface interface {
 	OrderByAsc(column string) manipulateData
 	OrderByDesc(column string) manipulateData
+}
 
+type manipulateData interface {
+	selectInterface
+	whereInterface
+	joinInterface
+	groupingInterface
+	orderingInterface
 	generateSelectQuery
-	errorInterface
 }
 
 type generateSelectQuery interface {
 	ToSql() (string, error)
-	errorInterface
 }
 
 type generateCreateQuery interface {
 	ToSql() (string, error)
 	Save() error
-	errorInterface
-}
-
-type errorInterface interface {
-	Error() error
 }
