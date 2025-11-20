@@ -133,6 +133,15 @@ func initQuery(q *queryStruct) (string, []interface{}) {
 
 func printQuery(q *queryStruct) string {
 	query, _ := initQuery(q)
+
+	if q.limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", q.limit)
+	}
+
+	if q.offset > 0 {
+		query += fmt.Sprintf(" OFFSET %d", q.offset)
+	}
+
 	return query
 }
 

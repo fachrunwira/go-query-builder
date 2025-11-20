@@ -27,6 +27,8 @@ type combinedInterface1 interface {
 	joinInterface
 	groupingInterface
 	orderingInterface
+	limiterInterface
+	generateSelectQuery
 }
 
 type selectInterface interface {
@@ -78,6 +80,16 @@ type orderingInterface interface {
 	OrderByDesc(column string) manipulateData
 }
 
+type limiterInterface interface {
+	Limit(limit uint) offsetInterface
+	generateSelectQuery
+}
+
+type offsetInterface interface {
+	Offset(offset uint) generateSelectQuery
+	generateSelectQuery
+}
+
 type manipulateData interface {
 	selectInterface
 	whereInterface
@@ -85,10 +97,13 @@ type manipulateData interface {
 	groupingInterface
 	orderingInterface
 	generateSelectQuery
+	limiterInterface
 }
 
 type generateSelectQuery interface {
 	ToSql() (string, error)
+	Get() (Rows, error)
+	First() (Row, error)
 }
 
 type generateCreateQuery interface {

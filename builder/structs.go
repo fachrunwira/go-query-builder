@@ -20,5 +20,8 @@ type queryStruct struct {
 
 	ordering []string
 
+	limit  uint
+	offset uint
+
 	errors error
 }
