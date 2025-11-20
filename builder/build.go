@@ -58,12 +58,26 @@ func (q *queryStruct) Save() error {
 	case "insert":
 		query, args := initManipulateData(q)
 
+		if q.useContext {
+			return trxContext(q.ctx, q.db, query, args...)
+		}
+
 		return trx(q.db, query, args...)
 	case "update":
 		query, args := initManipulateData(q)
+
+		if q.useContext {
+			return trxContext(q.ctx, q.db, query, args...)
+		}
+
 		return trx(q.db, query, args...)
 	case "delete":
 		query, args := initManipulateData(q)
+
+		if q.useContext {
+			return trxContext(q.ctx, q.db, query, args...)
+		}
+
 		return trx(q.db, query, args...)
 	}
 

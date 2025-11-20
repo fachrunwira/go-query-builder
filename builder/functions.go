@@ -1,11 +1,37 @@
 package builder
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"sort"
 	"strings"
 )
+
+func trxContext(ctx context.Context, db *sql.DB, query string, args ...interface{}) error {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	_, err = tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+
+	return err
+}
 
 func trx(db *sql.DB, query string, args ...interface{}) error {
 	tx, err := db.Begin()
@@ -22,11 +48,7 @@ func trx(db *sql.DB, query string, args ...interface{}) error {
 		}
 	}()
 
-	if len(args) > 0 {
-		_, err = tx.Exec(query, args...)
-	} else {
-		_, err = tx.Exec(query)
-	}
+	_, err = tx.Exec(query, args...)
 
 	if err != nil {
 		return err

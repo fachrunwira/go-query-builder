@@ -1,9 +1,14 @@
 package builder
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 type queryStruct struct {
 	db          *sql.DB
+	useContext  bool
+	ctx         context.Context
 	tableName   string
 	tableAlias  string
 	fields      []string
