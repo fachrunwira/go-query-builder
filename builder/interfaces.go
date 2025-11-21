@@ -61,6 +61,7 @@ type manipulateOrQuerying interface {
 	joinInterface
 	groupingInterface
 	orderingInterface
+	generateSelectQuery
 }
 
 type joinInterface interface {
