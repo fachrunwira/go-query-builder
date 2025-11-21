@@ -13,28 +13,27 @@ func (q *queryStruct) Get() (Rows, error) {
 	query, args := initQuery(q)
 
 	if q.limit > 0 {
-		query += fmt.Sprintf(" LIMIT %d", q.limit)
+		query += " LIMIT ?"
+		args = append(args, q.limit)
 	}
 
 	if q.offset > 0 {
-		query += fmt.Sprintf(" OFFSET %d", q.offset)
+		query += " OFFSET ?"
+		args = append(args, q.offset)
 	}
 
 	rows, err := q.db.Query(query, args...)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("no data found")
-		}
-		return nil, err
+		return nil, fmt.Errorf("query execution failed: %w", err)
 	}
 	defer rows.Close()
 
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get columns: %w", err)
 	}
 
-	result := Rows{}
+	result := make(Rows, 0, 100)
 	for rows.Next() {
 		values := make([]interface{}, len(columns))
 		valuesPtrs := make([]interface{}, len(columns))
@@ -44,9 +43,9 @@ func (q *queryStruct) Get() (Rows, error) {
 		}
 
 		if err = rows.Scan(valuesPtrs...); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("row scan failed: %w", err)
 		}
-		row := Row{}
+		row := make(Row)
 		for i, col := range columns {
 			val := values[i]
 			if b, ok := val.([]byte); ok {
@@ -56,6 +55,10 @@ func (q *queryStruct) Get() (Rows, error) {
 			}
 		}
 		result = append(result, row)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration failed: %w", err)
 	}
 
 	return result, nil
@@ -71,38 +74,37 @@ func (q *queryStruct) First() (Row, error) {
 
 	rows, err := q.db.Query(query, args...)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("no data found")
-		}
-		return nil, err
+		return nil, fmt.Errorf("query execution failed: %w", err)
 	}
 	defer rows.Close()
 
-	column, err := rows.Columns()
-	if err != nil {
-		return nil, err
+	if !rows.Next() {
+		return nil, fmt.Errorf("no data found: %w", sql.ErrNoRows)
 	}
 
+	column, err := rows.Columns()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get columns: %w", err)
+	}
+
+	values := make([]interface{}, len(column))
+	valuesPtrs := make([]interface{}, len(column))
 	result := Row{}
-	for rows.Next() {
-		values := make([]interface{}, len(column))
-		valuesPtrs := make([]interface{}, len(column))
 
-		for i := range column {
-			valuesPtrs[i] = &values[i]
-		}
+	for i := range column {
+		valuesPtrs[i] = &values[i]
+	}
 
-		if err = rows.Scan(valuesPtrs...); err != nil {
-			return nil, err
-		}
+	if err = rows.Scan(valuesPtrs...); err != nil {
+		return nil, fmt.Errorf("row scan failed: %w", err)
+	}
 
-		for i, col := range column {
-			val := values[i]
-			if b, ok := val.([]byte); ok {
-				result[col] = string(b)
-			} else {
-				result[col] = val
-			}
+	for i, col := range column {
+		val := values[i]
+		if b, ok := val.([]byte); ok {
+			result[col] = string(b)
+		} else {
+			result[col] = val
 		}
 	}
 
