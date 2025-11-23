@@ -50,7 +50,7 @@ func (q *queryStruct) RightJoin(tableJoin, table_1, operator, table_2 string) ma
 	return q
 }
 
-func (q *queryStruct) JoinWhere(tableJoin, table_1, operator string, bindings ...interface{}) manipulateData {
+func (q *queryStruct) JoinWhere(tableJoin, table_1, operator string, bindings ...any) manipulateData {
 	switch {
 	case tableJoin == "":
 		q.errors = fmt.Errorf("join table is empty")

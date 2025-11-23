@@ -22,7 +22,17 @@ func (q *queryStruct) Get() (Rows, error) {
 		args = append(args, q.offset)
 	}
 
-	rows, err := q.db.Query(query, args...)
+	var (
+		rows *sql.Rows
+		err  error
+	)
+
+	if q.useContext {
+		rows, err = q.db.QueryContext(q.ctx, query, args...)
+	} else {
+		rows, err = q.db.Query(query, args...)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("query execution failed: %w", err)
 	}
@@ -35,8 +45,8 @@ func (q *queryStruct) Get() (Rows, error) {
 
 	result := make(Rows, 0, 100)
 	for rows.Next() {
-		values := make([]interface{}, len(columns))
-		valuesPtrs := make([]interface{}, len(columns))
+		values := make([]any, len(columns))
+		valuesPtrs := make([]any, len(columns))
 
 		for i := range columns {
 			valuesPtrs[i] = &values[i]
@@ -72,7 +82,17 @@ func (q *queryStruct) First() (Row, error) {
 	query, args := initQuery(q)
 	query += " LIMIT 1;"
 
-	rows, err := q.db.Query(query, args...)
+	var (
+		rows *sql.Rows
+		err  error
+	)
+
+	if q.useContext {
+		rows, err = q.db.QueryContext(q.ctx, query, args...)
+	} else {
+		rows, err = q.db.Query(query, args...)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("query execution failed: %w", err)
 	}
@@ -87,8 +107,8 @@ func (q *queryStruct) First() (Row, error) {
 		return nil, fmt.Errorf("failed to get columns: %w", err)
 	}
 
-	values := make([]interface{}, len(column))
-	valuesPtrs := make([]interface{}, len(column))
+	values := make([]any, len(column))
+	valuesPtrs := make([]any, len(column))
 	result := Row{}
 
 	for i := range column {

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func trxContext(ctx context.Context, db *sql.DB, query string, args ...interface{}) error {
+func trxContext(ctx context.Context, db *sql.DB, query string, args ...any) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func trxContext(ctx context.Context, db *sql.DB, query string, args ...interface
 	return err
 }
 
-func trx(db *sql.DB, query string, args ...interface{}) error {
+func trx(db *sql.DB, query string, args ...any) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func clearStrings(data []string) []string {
 	return data
 }
 
-func initManipulateData(q *queryStruct) (string, []interface{}) {
+func initManipulateData(q *queryStruct) (string, []any) {
 	switch q.manipulateType {
 	case "insert":
 		keys := make([]string, 0, len(q.manipulateArgs[0]))
@@ -86,7 +86,7 @@ func initManipulateData(q *queryStruct) (string, []interface{}) {
 		placeholder := "(" + strings.Repeat("?,", len(keys)-1) + "?)"
 
 		valueGroup := make([]string, 0, len(keys))
-		values := make([]interface{}, 0, len(keys)*len(q.manipulateArgs))
+		values := make([]any, 0, len(keys)*len(q.manipulateArgs))
 
 		for _, row := range q.manipulateArgs {
 			valueGroup = append(valueGroup, placeholder)
@@ -98,7 +98,7 @@ func initManipulateData(q *queryStruct) (string, []interface{}) {
 		return fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;", q.tableName, strings.Join(keys, ","), strings.Join(valueGroup, ",")), values
 	case "update":
 		keys := make([]string, 0, len(q.manipulateArgs[0]))
-		values := make([]interface{}, 0, len(q.manipulateArgs[0]))
+		values := make([]any, 0, len(q.manipulateArgs[0]))
 		for k, v := range q.manipulateArgs[0] {
 			keys = append(keys, fmt.Sprintf("%s = ?", k))
 			values = append(values, v)
@@ -112,7 +112,7 @@ func initManipulateData(q *queryStruct) (string, []interface{}) {
 		return fmt.Sprintf("DELETE FROM %s WHERE %s;", q.tableName, strings.Join(q.whereClause, "")), q.whereArgs
 	}
 
-	return "", []interface{}{}
+	return "", []any{}
 }
 
 func printManipulateData(q *queryStruct) string {
@@ -120,13 +120,13 @@ func printManipulateData(q *queryStruct) string {
 	return query
 }
 
-func initQuery(q *queryStruct) (string, []interface{}) {
+func initQuery(q *queryStruct) (string, []any) {
 	fields := "*"
 	if len(q.fields) > 0 {
 		fields = strings.Join(q.fields, ",")
 	}
 
-	var args []interface{}
+	var args []any
 	query := fmt.Sprintf("SELECT %s FROM %s", fields, q.tableName)
 	if q.tableAlias != "" {
 		query += " AS " + q.tableAlias
@@ -171,7 +171,7 @@ func convertRow(data any) (Row, error) {
 	switch x := data.(type) {
 	case Row:
 		return x, nil
-	case map[string]interface{}:
+	case map[string]any:
 		return Row(x), nil
 	}
 	return nil, fmt.Errorf("unsupported type")
@@ -181,7 +181,7 @@ func convertRows(data any) (Rows, error) {
 	switch x := data.(type) {
 	case Rows:
 		return x, nil
-	case []map[string]interface{}:
+	case []map[string]any:
 		rows := make(Rows, len(x))
 		for i := range x {
 			rows[i] = Row(x[i])
@@ -189,7 +189,7 @@ func convertRows(data any) (Rows, error) {
 		return rows, nil
 	case Row:
 		return Rows{x}, nil
-	case map[string]interface{}:
+	case map[string]any:
 		return Rows{Row(x)}, nil
 	}
 	return nil, fmt.Errorf("unsupported type")

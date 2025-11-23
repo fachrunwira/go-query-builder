@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (q *queryStruct) InsertRaw(query string, bindings ...interface{}) error {
+func (q *queryStruct) InsertRaw(query string, bindings ...any) error {
 	switch {
 	case query == "":
 		return fmt.Errorf("query is empty")
@@ -18,7 +18,7 @@ func (q *queryStruct) InsertRaw(query string, bindings ...interface{}) error {
 	return trx(q.db, query, bindings...)
 }
 
-func (q *queryStruct) UpdateRaw(query string, bindings ...interface{}) error {
+func (q *queryStruct) UpdateRaw(query string, bindings ...any) error {
 	switch {
 	case query == "":
 		return fmt.Errorf("query is empty")
@@ -30,7 +30,7 @@ func (q *queryStruct) UpdateRaw(query string, bindings ...interface{}) error {
 	return trx(q.db, query, bindings...)
 }
 
-func (q *queryStruct) DeleteRaw(query string, bindings ...interface{}) error {
+func (q *queryStruct) DeleteRaw(query string, bindings ...any) error {
 	switch {
 	case query == "":
 		return fmt.Errorf("query is empty")

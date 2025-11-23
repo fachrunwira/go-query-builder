@@ -1,19 +1,11 @@
 package builder
 
-// Row represents a single database record, where each key is the column name
-// and the value is the associated field value.
-type Row map[string]interface{}
-
-// Rows represents a collection of Row values, typically used to return
-// multiple records from a query or result set.
-type Rows []Row
-
 // initialStage this is something.
 type initialStage interface {
 	Table(table string, alias ...string) insertOrQueryingStage
-	InsertRaw(query string, bindings ...interface{}) error
-	UpdateRaw(query string, bindings ...interface{}) error
-	DeleteRaw(query string, bindings ...interface{}) error
+	InsertRaw(query string, bindings ...any) error
+	UpdateRaw(query string, bindings ...any) error
+	DeleteRaw(query string, bindings ...any) error
 }
 
 type insertOrQueryingStage interface {
@@ -36,17 +28,17 @@ type selectInterface interface {
 }
 
 type whereInterface interface {
-	WhereRaw(query string, bindings ...interface{}) manipulateOrQuerying
-	Where(column string, values interface{}) manipulateOrQuerying
-	WhereNot(column string, values interface{}) manipulateOrQuerying
-	WhereIn(column string, values []interface{}) manipulateOrQuerying
-	WhereNotIn(column string, values []interface{}) manipulateOrQuerying
+	WhereRaw(query string, bindings ...any) manipulateOrQuerying
+	Where(column string, values any) manipulateOrQuerying
+	WhereNot(column string, values any) manipulateOrQuerying
+	WhereIn(column string, values []any) manipulateOrQuerying
+	WhereNotIn(column string, values []any) manipulateOrQuerying
 
-	OrWhereRaw(query string, bindings ...interface{}) manipulateOrQuerying
-	OrWhere(column string, values interface{}) manipulateOrQuerying
-	OrWhereNot(column string, values interface{}) manipulateOrQuerying
-	OrWhereIn(column string, values []interface{}) manipulateOrQuerying
-	OrWhereNotIn(column string, values []interface{}) manipulateOrQuerying
+	OrWhereRaw(query string, bindings ...any) manipulateOrQuerying
+	OrWhere(column string, values any) manipulateOrQuerying
+	OrWhereNot(column string, values any) manipulateOrQuerying
+	OrWhereIn(column string, values []any) manipulateOrQuerying
+	OrWhereNotIn(column string, values []any) manipulateOrQuerying
 }
 
 type updateOrDeleteInterface interface {
@@ -66,7 +58,7 @@ type manipulateOrQuerying interface {
 
 type joinInterface interface {
 	Join(tableJoin, table_1, operator, table_2 string) manipulateData
-	JoinWhere(tableJoin, table_1, operator string, bindings ...interface{}) manipulateData
+	JoinWhere(tableJoin, table_1, operator string, bindings ...any) manipulateData
 
 	LeftJoin(tableJoin, table_1, operator, table_2 string) manipulateData
 	RightJoin(tableJoin, table_1, operator, table_2 string) manipulateData

@@ -13,10 +13,10 @@ type queryStruct struct {
 	tableAlias  string
 	fields      []string
 	whereClause []string
-	whereArgs   []interface{}
+	whereArgs   []any
 
 	joins    []string
-	joinArgs []interface{}
+	joinArgs []any
 
 	manipulateType string
 	manipulateArgs Rows
