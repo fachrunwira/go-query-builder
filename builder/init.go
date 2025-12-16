@@ -18,7 +18,7 @@ func initContextBuilder() *queryStruct {
 	return &queryStruct{}
 }
 
-func MakeWithContext(ctx context.Context, _db *sql.DB) initialStage {
+func MakeWithContext(ctx context.Context) initialStage {
 	qStruct := initContextBuilder()
 	qStruct.useContext = true
 	qStruct.ctx = ctx
@@ -44,7 +44,7 @@ func UseDefaultKey() {
 	contextKey = defaultKeyContext
 }
 
-func SetDefaultKey(key any) {
+func SetContextKey(key any) {
 	contextKeyLock.Lock()
 	defer contextKeyLock.Unlock()
 	contextKey = defaultKeyContext
