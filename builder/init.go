@@ -47,7 +47,7 @@ func UseDefaultKey() {
 func SetContextKey(key any) {
 	contextKeyLock.Lock()
 	defer contextKeyLock.Unlock()
-	contextKey = defaultKeyContext
+	contextKey = key
 }
 
 func getContextKey() any {
