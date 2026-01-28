@@ -27,7 +27,7 @@ func (q *queryStruct) Select(columns ...string) manipulateData {
 	return q
 }
 
-func (q *queryStruct) ToRaw() string {
+func (q *queryStruct) ToRaw() (string, error) {
 	fields := "*"
 	if len(q.fields) > 0 {
 		fields = strings.Join(q.fields, ", ")
@@ -38,7 +38,30 @@ func (q *queryStruct) ToRaw() string {
 		query += " AS " + q.tableAlias
 	}
 
-	return query + ";"
+	if len(q.whereClause) > 0 {
+		var errWhere error
+		for k, v := range q.whereClause {
+			clauseValue := v
+			for range q.whereArgs {
+				if strings.Contains(clauseValue, "?") {
+					var popValue any
+					popValue, q.whereArgs = q.whereArgs[0], q.whereArgs[1:]
+
+					clauseValue, errWhere = getArgsValue(clauseValue, popValue)
+					if errWhere != nil {
+						return "", fmt.Errorf("failed to generate raw query sql: %w", errWhere)
+					}
+				} else {
+					continue
+				}
+			}
+			q.whereClause[k] = clauseValue
+		}
+
+		query += fmt.Sprintf(" WHERE %s", strings.Join(q.whereClause, " "))
+	}
+
+	return query + ";", nil
 }
 
 func (q *queryStruct) ToSql() (string, error) {

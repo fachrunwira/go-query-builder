@@ -1,8 +1,8 @@
-package builder
+package buildersub
 
 import "fmt"
 
-func (q *queryStruct) OrderByAsc(column string) manipulateData {
+func (q *queryStruct) OrderByAsc(column string) SubQuery {
 	if column != "" {
 		q.ordering = append(q.ordering, fmt.Sprintf("%s ASC", column))
 	}
@@ -10,7 +10,7 @@ func (q *queryStruct) OrderByAsc(column string) manipulateData {
 	return q
 }
 
-func (q *queryStruct) OrderByDesc(column string) manipulateData {
+func (q *queryStruct) OrderByDesc(column string) SubQuery {
 	if column != "" {
 		q.ordering = append(q.ordering, fmt.Sprintf("%s DESC", column))
 	}

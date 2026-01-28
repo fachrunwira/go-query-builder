@@ -1,5 +1,11 @@
 package builder
 
+import (
+	"github.com/fachrunwira/go-query-builder/buildersub"
+	"github.com/fachrunwira/go-query-builder/clauseoperators"
+	"github.com/fachrunwira/go-query-builder/joinbuilder"
+)
+
 // initialStage this is something.
 type initialStage interface {
 	Table(table string, alias ...string) insertOrQueryingStage
@@ -28,17 +34,35 @@ type selectInterface interface {
 }
 
 type whereInterface interface {
-	WhereRaw(query string, bindings ...any) manipulateOrQuerying
-	Where(column string, values any) manipulateOrQuerying
-	WhereNot(column string, values any) manipulateOrQuerying
-	WhereIn(column string, values []any) manipulateOrQuerying
-	WhereNotIn(column string, values []any) manipulateOrQuerying
+	Where(column string, operator clauseoperators.Operators, args ...any) manipulateOrQuerying
+	WhereIn(column string, args ...any) manipulateOrQuerying
+	WhereExists(callback func() buildersub.SubQuery) manipulateOrQuerying
+	WhereBetween(column string, args ...any) manipulateOrQuerying
+	WhereNull(column string) manipulateOrQuerying
+	WhereSub(column string, operator clauseoperators.Operators, callback func() buildersub.SubQuery) manipulateOrQuerying
+	WhereRaw(query string, args ...any) manipulateOrQuerying
 
-	OrWhereRaw(query string, bindings ...any) manipulateOrQuerying
-	OrWhere(column string, values any) manipulateOrQuerying
-	OrWhereNot(column string, values any) manipulateOrQuerying
-	OrWhereIn(column string, values []any) manipulateOrQuerying
-	OrWhereNotIn(column string, values []any) manipulateOrQuerying
+	WhereNot(column string, operator clauseoperators.Operators, args ...any) manipulateOrQuerying
+	WhereNotIn(column string, args ...any) manipulateOrQuerying
+	WhereNotExists(callback func() buildersub.SubQuery) manipulateOrQuerying
+	WhereNotBetween(column string, args ...any) manipulateOrQuerying
+	WhereNotNull(column string) manipulateOrQuerying
+	WhereNotSub(column string, operator clauseoperators.Operators, callback func() buildersub.SubQuery) manipulateOrQuerying
+
+	OrWhere(column string, operator clauseoperators.Operators, args ...any) manipulateOrQuerying
+	OrWhereIn(column string, args ...any) manipulateOrQuerying
+	OrWhereExists(callback func() buildersub.SubQuery) manipulateOrQuerying
+	OrWhereBetween(column string, args ...any) manipulateOrQuerying
+	OrWhereNull(column string) manipulateOrQuerying
+	OrWhereSub(column string, operator clauseoperators.Operators, callback func() buildersub.SubQuery) manipulateOrQuerying
+	OrWhereRaw(query string, args ...any) manipulateOrQuerying
+
+	OrWhereNot(column string, operator clauseoperators.Operators, args ...any) manipulateOrQuerying
+	OrWhereNotIn(column string, args ...any) manipulateOrQuerying
+	OrWhereNotExists(callback func() buildersub.SubQuery) manipulateOrQuerying
+	OrWhereNotBetween(column string, args ...any) manipulateOrQuerying
+	OrWhereNotNull(column string) manipulateOrQuerying
+	OrWhereNotSub(column string, operator clauseoperators.Operators, callback func() buildersub.SubQuery) manipulateOrQuerying
 }
 
 type updateOrDeleteInterface interface {
@@ -54,14 +78,19 @@ type manipulateOrQuerying interface {
 	groupingInterface
 	orderingInterface
 	generateSelectQuery
+	limiterInterface
 }
 
 type joinInterface interface {
-	Join(tableJoin, table_1, operator, table_2 string) manipulateData
-	JoinWhere(tableJoin, table_1, operator string, bindings ...any) manipulateData
+	Join(tableJoin string, callback func() joinbuilder.JoinQuery) manipulateData
+	LeftJoin(tableJoin string, callback func() joinbuilder.JoinQuery) manipulateData
+	RightJoin(tableJoin string, callback func() joinbuilder.JoinQuery) manipulateData
 
-	LeftJoin(tableJoin, table_1, operator, table_2 string) manipulateData
-	RightJoin(tableJoin, table_1, operator, table_2 string) manipulateData
+	JoinSub(query func() buildersub.SubQuery, as string, clause func() joinbuilder.JoinQuery) manipulateData
+	LeftJoinSub(query func() buildersub.SubQuery, as string, clause func() joinbuilder.JoinQuery) manipulateData
+	RightJoinSub(query func() buildersub.SubQuery, as string, clause func() joinbuilder.JoinQuery) manipulateData
+
+	CrossJoin(tableJoin string) manipulateData
 }
 
 type groupingInterface interface {
@@ -95,11 +124,13 @@ type manipulateData interface {
 
 type generateSelectQuery interface {
 	ToSql() (string, error)
+	ToRaw() (string, error)
 	Get() (Rows, error)
 	First() (Row, error)
 }
 
 type generateCreateQuery interface {
 	ToSql() (string, error)
+	ToRaw() (string, error)
 	Save() error
 }

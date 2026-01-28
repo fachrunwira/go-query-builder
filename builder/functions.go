@@ -5,7 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/fachrunwira/go-query-builder/clauseoperators"
 )
 
 func trxContext(ctx context.Context, db *sql.DB, query string, args ...any) error {
@@ -193,4 +197,56 @@ func convertRows(data any) (Rows, error) {
 		return Rows{Row(x)}, nil
 	}
 	return nil, fmt.Errorf("unsupported type")
+}
+
+func getArgsValue(clause string, value any) (string, error) {
+	switch x := value.(type) {
+	case string:
+		return strings.Replace(clause, "?", fmt.Sprintf("%q", x), 1), nil
+	case int:
+		return strings.Replace(clause, "?", strconv.Itoa(x), 1), nil
+	case float64:
+		return strings.Replace(clause, "?", strconv.FormatFloat(x, 'f', -1, 64), 1), nil
+	case time.Time:
+		return strings.Replace(clause, "?", fmt.Sprintf("%q", x.Format("2006-01-02 15:04:05")), 1), nil
+	default:
+		return "", fmt.Errorf("unexpected value: %v", x)
+	}
+}
+
+func getClauseOperator(operator clauseoperators.Operators, args ...any) (string, string, error) {
+	if len(args) == 0 {
+		return "", "", fmt.Errorf("arguments value is at least one")
+	}
+
+	switch operator {
+	case clauseoperators.EQUAL,
+		clauseoperators.GREATER_THAN,
+		clauseoperators.GREATER_THAN_EQUAL,
+		clauseoperators.LESS_THAN,
+		clauseoperators.LESS_THAN_EQUAL,
+		clauseoperators.LIKE:
+		return string(operator), "", nil
+	case clauseoperators.IN:
+		placeholder := "(" + strings.Repeat("?,", len(args)-1) + "?)"
+
+		return string(operator), placeholder, nil
+	}
+
+	return "", "", fmt.Errorf("invalid operators %q", operator)
+}
+
+func getClauseOperatorSub(operator clauseoperators.Operators) (string, error) {
+	switch operator {
+	case clauseoperators.EQUAL,
+		clauseoperators.GREATER_THAN,
+		clauseoperators.GREATER_THAN_EQUAL,
+		clauseoperators.LESS_THAN,
+		clauseoperators.LESS_THAN_EQUAL,
+		clauseoperators.LIKE,
+		clauseoperators.IN:
+		return string(operator), nil
+	}
+
+	return "", fmt.Errorf("invalid operators %q", operator)
 }
