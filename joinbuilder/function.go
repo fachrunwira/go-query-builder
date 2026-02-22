@@ -13,12 +13,12 @@ func getClauseOperator(operator clauseoperators.Operators, args ...any) (string,
 	}
 
 	switch operator {
-	case clauseoperators.EQUAL:
-	case clauseoperators.GREATER_THAN:
-	case clauseoperators.GREATER_THAN_EQUAL:
-	case clauseoperators.LESS_THAN:
-	case clauseoperators.LESS_THAN_EQUAL:
-	case clauseoperators.LIKE:
+	case clauseoperators.EQUAL,
+		clauseoperators.GREATER_THAN,
+		clauseoperators.GREATER_THAN_EQUAL,
+		clauseoperators.LESS_THAN,
+		clauseoperators.LESS_THAN_EQUAL,
+		clauseoperators.LIKE:
 		return string(operator), "", nil
 	case clauseoperators.IN:
 		placeholder := "(" + strings.Repeat("?,", len(args)-1) + "?)"
@@ -31,13 +31,13 @@ func getClauseOperator(operator clauseoperators.Operators, args ...any) (string,
 
 func getClauseOperatorSub(operator clauseoperators.Operators) (string, error) {
 	switch operator {
-	case clauseoperators.EQUAL:
-	case clauseoperators.GREATER_THAN:
-	case clauseoperators.GREATER_THAN_EQUAL:
-	case clauseoperators.LESS_THAN:
-	case clauseoperators.LESS_THAN_EQUAL:
-	case clauseoperators.LIKE:
-	case clauseoperators.IN:
+	case clauseoperators.EQUAL,
+		clauseoperators.GREATER_THAN,
+		clauseoperators.GREATER_THAN_EQUAL,
+		clauseoperators.LESS_THAN,
+		clauseoperators.LESS_THAN_EQUAL,
+		clauseoperators.LIKE,
+		clauseoperators.IN:
 		return string(operator), nil
 	}
 

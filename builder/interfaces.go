@@ -127,6 +127,8 @@ type generateSelectQuery interface {
 	ToRaw() (string, error)
 	Get() (Rows, error)
 	First() (Row, error)
+	Exists() (bool, error)
+	Count() (int64, error)
 }
 
 type generateCreateQuery interface {

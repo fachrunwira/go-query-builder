@@ -3,6 +3,7 @@ package builder
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
 func (q *queryStruct) Get() (Rows, error) {
@@ -129,4 +130,119 @@ func (q *queryStruct) First() (Row, error) {
 	}
 
 	return result, nil
+}
+
+func (q *queryStruct) Exists() (bool, error) {
+	if q.errors != nil {
+		return false, q.errors
+	}
+
+	var args []any
+	query := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s", q.tableName)
+	if q.tableAlias != "" {
+		query += fmt.Sprintf(" AS %s", q.tableAlias)
+	}
+
+	if len(q.joins) > 0 {
+		query += fmt.Sprintf(" %s", strings.Join(q.joins, " "))
+		args = append(args, q.joinArgs...)
+	}
+
+	if len(q.whereClause) > 0 {
+		query += fmt.Sprintf(" WHERE %s", strings.Join(q.whereClause, " "))
+		args = append(args, q.whereArgs...)
+	}
+
+	if len(q.grouping) > 0 {
+		query += fmt.Sprintf(" GROUP BY %s", strings.Join(q.grouping, ","))
+	}
+
+	query += ")"
+
+	var (
+		row    *sql.Row
+		exists bool
+		err    error
+	)
+
+	if q.useContext {
+		row = q.db.QueryRowContext(q.ctx, query, args...)
+	} else {
+		row = q.db.QueryRow(query, args...)
+	}
+
+	err = row.Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("query execution failed: %w", err)
+	}
+
+	return exists, nil
+}
+
+func (q *queryStruct) Count() (int64, error) {
+	if q.errors != nil {
+		return 0, q.errors
+	}
+
+	var (
+		args  []any
+		query string
+		row   *sql.Row
+		total int64
+		err   error
+	)
+
+	if len(q.grouping) > 0 {
+		fields := "*"
+		if len(q.fields) > 0 {
+			fields = strings.Join(q.fields, ",")
+		}
+
+		query = fmt.Sprintf("SELECT COUNT(*) FROM (SELECT %s FROM %s", fields, q.tableName)
+		if q.tableAlias != "" {
+			query += fmt.Sprintf(" AS %s", q.tableAlias)
+		}
+
+		if len(q.joins) > 0 {
+			query += fmt.Sprintf(" %s", strings.Join(q.joins, " "))
+			args = append(args, q.joinArgs...)
+		}
+
+		if len(q.whereClause) > 0 {
+			query += fmt.Sprintf(" WHERE %s", strings.Join(q.whereClause, " "))
+			args = append(args, q.whereArgs...)
+		}
+
+		query += fmt.Sprintf(" GROUP BY %s) AS total_row", strings.Join(q.grouping, ","))
+	} else {
+		query = fmt.Sprintf("SELECT COUNT(*) FROM %s", q.tableName)
+		if q.tableAlias != "" {
+			query += fmt.Sprintf(" AS %s", q.tableAlias)
+		}
+
+		if len(q.joins) > 0 {
+			query += fmt.Sprintf(" %s", strings.Join(q.joins, " "))
+			args = append(args, q.joinArgs...)
+		}
+
+		if len(q.whereClause) > 0 {
+			query += fmt.Sprintf(" WHERE %s", strings.Join(q.whereClause, " "))
+			args = append(args, q.whereArgs...)
+		}
+	}
+
+	fmt.Print(args...)
+
+	if q.useContext {
+		row = q.db.QueryRowContext(q.ctx, query, args...)
+	} else {
+		row = q.db.QueryRow(query, args...)
+	}
+
+	err = row.Scan(&total)
+	if err != nil {
+		return 0, fmt.Errorf("query execution failed: %w", err)
+	}
+
+	return total, nil
 }
