@@ -108,12 +108,12 @@ func initManipulateData(q *queryStruct) (string, []any) {
 			values = append(values, v)
 		}
 
-		whereClauses := "WHERE" + strings.Join(q.whereClause, "")
+		whereClauses := "WHERE " + strings.Join(q.whereClause, " ")
 		values = append(values, q.whereArgs...)
 
 		return fmt.Sprintf("UPDATE %s SET %s %s;", q.tableName, strings.Join(keys, ", "), whereClauses), values
 	case "delete":
-		return fmt.Sprintf("DELETE FROM %s WHERE %s;", q.tableName, strings.Join(q.whereClause, "")), q.whereArgs
+		return fmt.Sprintf("DELETE FROM %s WHERE %s;", q.tableName, strings.Join(q.whereClause, " ")), q.whereArgs
 	}
 
 	return "", []any{}
