@@ -47,9 +47,9 @@ type orderingInterface interface {
 }
 
 type joinInterface interface {
-	Join(callback func() joinbuilder.JoinQuery) SubQuery
-	LeftJoin(callback func() joinbuilder.JoinQuery) SubQuery
-	RightJoin(callback func() joinbuilder.JoinQuery) SubQuery
+	Join(tableJoin string, callback func() joinbuilder.JoinQuery) SubQuery
+	LeftJoin(tableJoin string, callback func() joinbuilder.JoinQuery) SubQuery
+	RightJoin(tableJoin string, callback func() joinbuilder.JoinQuery) SubQuery
 
 	CrossJoin(tableJoin string) SubQuery
 }

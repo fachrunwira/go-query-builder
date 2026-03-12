@@ -6,7 +6,7 @@ import (
 	"github.com/fachrunwira/go-query-builder/joinbuilder"
 )
 
-func (qs *queryStruct) Join(callback func() joinbuilder.JoinQuery) SubQuery {
+func (qs *queryStruct) Join(tableJoin string, callback func() joinbuilder.JoinQuery) SubQuery {
 	cb := callback()
 	if cb == nil {
 		qs.err = fmt.Errorf("no join builder detected in sub query")
@@ -19,12 +19,12 @@ func (qs *queryStruct) Join(callback func() joinbuilder.JoinQuery) SubQuery {
 		return qs
 	}
 
-	qs.joins = append(qs.joins, fmt.Sprintf("INNER JOIN %s", query))
+	qs.joins = append(qs.joins, fmt.Sprintf("INNER JOIN %s %s", tableJoin, query))
 	qs.joinArgs = append(qs.joinArgs, args...)
 	return qs
 }
 
-func (qs *queryStruct) LeftJoin(callback func() joinbuilder.JoinQuery) SubQuery {
+func (qs *queryStruct) LeftJoin(tableJoin string, callback func() joinbuilder.JoinQuery) SubQuery {
 	cb := callback()
 	if cb == nil {
 		qs.err = fmt.Errorf("no join builder detected in sub query")
@@ -37,12 +37,12 @@ func (qs *queryStruct) LeftJoin(callback func() joinbuilder.JoinQuery) SubQuery 
 		return qs
 	}
 
-	qs.joins = append(qs.joins, fmt.Sprintf("LEFT JOIN %s", query))
+	qs.joins = append(qs.joins, fmt.Sprintf("LEFT JOIN %s %s", tableJoin, query))
 	qs.joinArgs = append(qs.joinArgs, args...)
 	return qs
 }
 
-func (qs *queryStruct) RightJoin(callback func() joinbuilder.JoinQuery) SubQuery {
+func (qs *queryStruct) RightJoin(tableJoin string, callback func() joinbuilder.JoinQuery) SubQuery {
 	cb := callback()
 	if cb == nil {
 		qs.err = fmt.Errorf("no join builder detected in sub query")
@@ -55,7 +55,7 @@ func (qs *queryStruct) RightJoin(callback func() joinbuilder.JoinQuery) SubQuery
 		return qs
 	}
 
-	qs.joins = append(qs.joins, fmt.Sprintf("RIGHT JOIN %s", query))
+	qs.joins = append(qs.joins, fmt.Sprintf("RIGHT JOIN %s %s", tableJoin, query))
 	qs.joinArgs = append(qs.joinArgs, args...)
 	return qs
 }
